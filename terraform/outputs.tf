@@ -18,5 +18,12 @@ output "dataflow_service_account" {
   value       = google_service_account.dataflow_sa.email
 }
 
+output "composer_uri" {
+  description = "Composer Airflow URI"
+  value       = google_composer_environment.etl-composer.config.0.airflow_uri
+}
 
-
+output "composer_dag_gcs_prefix" {
+  description = "GCS prefix for Composer DAGs"
+  value       = google_composer_environment.etl-composer.config.0.dag_gcs_prefix
+}
