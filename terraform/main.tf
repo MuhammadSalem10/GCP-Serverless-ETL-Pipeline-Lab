@@ -34,9 +34,9 @@ resource "google_project_service" "required_apis" {
 }
 
 resource "google_storage_bucket" "source_bucket" {
-  name     = "${var.project_id}-etl-source-data"
-  location = var.region
-
+  name          = "${var.project_id}-etl-source-data"
+  location      = var.region
+  force_destroy = true
   versioning {
     enabled = true
   }
@@ -58,7 +58,6 @@ resource "google_bigquery_dataset" "sales_dataset" {
   location    = var.region
   description = "Dataset for sales analytics pipeline"
 
-  # Security best practice: Set access controls
   access {
     role          = "OWNER"
     user_by_email = data.google_client_openid_userinfo.me.email
