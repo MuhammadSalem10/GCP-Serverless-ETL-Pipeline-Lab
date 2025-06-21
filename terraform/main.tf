@@ -33,17 +33,14 @@ resource "google_project_service" "required_apis" {
   disable_on_destroy         = false
 }
 
-# Create Cloud Storage bucket for raw data
 resource "google_storage_bucket" "source_bucket" {
   name     = "${var.project_id}-etl-source-data"
   location = var.region
 
-  # DevOps Best Practice: Enable versioning for data lineage
   versioning {
     enabled = true
   }
 
-  # Cost optimization: Lifecycle management
   lifecycle_rule {
     condition {
       age = 30
@@ -56,7 +53,6 @@ resource "google_storage_bucket" "source_bucket" {
   depends_on = [google_project_service.required_apis]
 }
 
-# Create BigQuery dataset
 resource "google_bigquery_dataset" "sales_dataset" {
   dataset_id  = "sales_analytics"
   location    = var.region
@@ -71,7 +67,6 @@ resource "google_bigquery_dataset" "sales_dataset" {
   depends_on = [google_project_service.required_apis]
 }
 
-# Create BigQuery table with predefined schema
 resource "google_bigquery_table" "sales_data" {
   dataset_id          = google_bigquery_dataset.sales_dataset.dataset_id
   table_id            = "sales_data"
@@ -111,21 +106,18 @@ resource "google_bigquery_table" "sales_data" {
   ])
 }
 
-# Service Account for Dataflow
 resource "google_service_account" "dataflow_sa" {
   account_id   = "dataflow-pipeline-sa"
   display_name = "Dataflow Pipeline Service Account"
   description  = "Service account for Dataflow ETL pipeline"
 }
 
-# Service Account for Composer
 resource "google_service_account" "composer_sa" {
   account_id   = "composer-airflow-sa"
   display_name = "Composer Airflow Service Account"
   description  = "Service account for Cloud Composer environment"
 }
 
-# IAM roles for Dataflow service account (least privilege principle)
 resource "google_project_iam_member" "dataflow_permissions" {
   for_each = toset([
     "roles/dataflow.worker",
@@ -140,7 +132,6 @@ resource "google_project_iam_member" "dataflow_permissions" {
   member  = "serviceAccount:${google_service_account.dataflow_sa.email}"
 }
 
-# IAM roles for Composer service account
 resource "google_project_iam_member" "composer_permissions" {
   for_each = toset([
     "roles/composer.worker",
